@@ -3,9 +3,10 @@ const express = require('express');
 const fs = require('fs');
 const path = require('path');
 const app = express();
+const uuid = require('uuid');
 //Middleware section of app.use
 app.use(express.json());
-app.use(express.urlencoded({extended:true}));
+app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
 //API routes
@@ -19,22 +20,34 @@ app.get('/api/notes', (requestObj, responseObj) => {
         if (error) {
             throw error;
         }
-        const notes = JSON.parse(output);//stores the notes in json
+        const notes = JSON.parse(output);//gets the notes
         responseObj.json(notes);
     });
 });
 
 app.post('/api/notes', (requestObj, responseObj) => {
     fs.readFile('./db/db.json', (error, output) => {
-        if(error) { 
+        if (error) {
             throw error;//ensures a valid db is being read
         }
+        const id = uuid.v4();//generates id, needs this to be able to click on a note to pull it up again
+        const noteText = requestObj.body.text;
+        const noteTitle = requestObj.body.title;
+        const newNote = {//newNote Object with id
+            id: id,
+            text: noteText,
+            title: noteTitle
+        };
         let noteArray = JSON.parse(output);
-        noteArray.push(requestObj.body);
-        fs.writeFile('./db/db.json', JSON.stringify(noteArray), (error) => {//posts the notes to the left side
+        noteArray.push(newNote);
+        
+        fs.writeFile('./db/db.json', JSON.stringify(noteArray), (error) => {//writes notes in db.json
             if (error) {
                 console.log(error);
             }
+            responseObj.json({//client needs a response
+                message: 'Note Saved'
+            });
         });
     })
 });
