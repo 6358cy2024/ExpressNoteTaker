@@ -45,7 +45,7 @@ app.post('/api/notes', (requestObj, responseObj) => {
             if (error) {
                 console.log(error);
             }
-            responseObj.json({//client needs a response
+            responseObj.json({//client needs a response to let the notes load without refreshing
                 message: 'Note Saved'
             });
         });
