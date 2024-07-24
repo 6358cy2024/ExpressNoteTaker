@@ -12,22 +12,33 @@ app.use(express.static('public'));
 
 app.get('/notes', (requestObj, responseObj) => {
     responseObj.sendFile(path.join(__dirname, './public/notes.html'));
-});//gets the note from the public folder.
+});//sends to the public folder.
 
 app.get('/api/notes', (requestObj, responseObj) => {
+    fs.readFile('./db/db.json', (error, output) => {
+        if (error) {
+            throw error;
+        }
+        const notes = JSON.parse(output);//stores the notes in json
+        responseObj.json(notes);
+    });
+});
+
+app.post('/api/notes', (requestObj, responseObj) => {
     fs.readFile('./db/db.json', (error, output) => {
         if(error) { 
             throw error;//ensures a valid db is being read
         }
         let noteArray = JSON.parse(output);
         noteArray.push(requestObj.body);
-        fs.writeFile('./db/db.json', JSON.stringify(noteArray), (error) => {
+        fs.writeFile('./db/db.json', JSON.stringify(noteArray), (error) => {//posts the notes to the left side
             if (error) {
                 console.log(error);
             }
         });
     })
 });
+
 
 app.get('*', (requestObj, responseObj) => {
     responseObj.sendFile(path.join(__dirname, './public/index.html'));
